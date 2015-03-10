@@ -1,0 +1,120 @@
+
+http://dev.mysql.com/doc/refman/5.5/en/create-database.html
+
+
+
+ - SHOW DATABASES;
+ - USE TEST;
+ - SHOW TABLES;
+ 
+ - CREATE TABLE pet (name VARCHAR(20), owner VARCHAR(20), species VARCHAR(20), sex CHAR(1), birth DATE, death DATE);
+ 
+ - DESCRIBE pet;
+ 
+ - LOAD DATA LOCAL INFILE 'C:/pet.txt' INTO TABLE pet
+    -> LINES TERMINATED BY '\r\n';
+
+ - INSERT INTO pet VALUES ('Puffball','Diane','hamster','f','1999-03-30',NULL);
+
+
+
+
+http://dev.mysql.com/doc/refman/5.0/en/tutorial.html - DB related operations
+
+
+http://dev.mysql.com/doc/refman/5.0/en/resetting-permissions.html  - User_id and password
+
+
+C:\Program Files\MySQL\MySQL Server 5.0\bin\mysqld-nt --init-file=C:\user.txt
+
+
+for starting the server
+mysqld --console -u root
+
+
+for starting the client
+mysql -u root
+
+
+DELIMITER // 
+CREATE PROCEDURE read_pet (
+	IN in_name VARCHAR(100),
+	OUT out_owner VARCHAR(100),
+	OUT out_species VARCHAR(100),
+	OUT out_sex VARCHAR(100),
+	OUT out_birth DATE,
+	OUT out_death DATE)
+BEGIN
+	SELECT owner, species, sex, birth, death
+	INTO out_owner, out_species, out_sex, out_birth, out_death
+	FROM pet where name = in_name;
+END //
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS read_pet$$
+
+CALL read_pet('Fluffy', @out_owner, @out_species, @out_sex, @out_birth, @out_death);
+
+SELECT @out_owner, @out_species, @out_sex, @out_birth, @out_death;
+
+
+
+DELIMITER //
+CREATE PROCEDURE read_all_pets()
+BEGIN
+   SELECT name, owner, species, sex, birth, death FROM pet;
+END //
+DELIMITER ;
+
+CALL read_all_pets();
+
+
+
+DROP FUNCTION IF EXISTS get_pet_owner;
+
+DELIMITER $$
+CREATE FUNCTION get_pet_owner(in_name VARCHAR(200)) RETURNS VARCHAR(200)
+BEGIN
+   DECLARE out_owner VARCHAR(200);
+
+   SELECT owner
+   INTO out_owner
+   FROM pet where name = in_name;
+
+   RETURN out_owner;
+END;
+$$
+
+SELECT get_pet_owner('Fluffy') AS owner; $$
+
+
+CREATE TABLE USER (
+     id MEDIUMINT NOT NULL AUTO_INCREMENT,
+     first_name CHAR(30) NULL,
+     last_name CHAR(30) NULL,
+     PRIMARY KEY (id)
+) ENGINE=MyISAM;
+
+
+INSERT INTO USER (first_name, last_name) VALUES ('Srinivas', 'Mudunuri');
+
+
+CREATE TABLE AUDIT (
+     id MEDIUMINT NOT NULL AUTO_INCREMENT,
+     description VARCHAR(300) NULL,
+     PRIMARY KEY (id)
+) ENGINE=MyISAM;
+
+
+
+
+
+
+
+
+
+
+
+
+

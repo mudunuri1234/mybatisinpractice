@@ -1,0 +1,152 @@
+
+
+CREATE TABLE SPOWNER.PET (
+    ID NUMBER(5,0) NOT NULL,
+    NAME VARCHAR2(75),
+    OWNER VARCHAR2(75),
+    SPECIES VARCHAR2(75),
+    SEX CHAR(1),
+    BIRTH DATE,
+    DEATH DATE,
+    CONSTRAINT PET_ID_PK PRIMARY KEY (ID)
+    USING INDEX
+)
+/
+
+CREATE SEQUENCE SPOWNER.PET_ID_SEQ
+  START WITH 1
+  MAXVALUE 999999999999999999999999999
+  MINVALUE 1
+  NOCYCLE
+  CACHE 20
+  NOORDER
+/
+
+INSERT INTO PET VALUES (SPOWNER.PET_ID_SEQ.nextval, 'Puffball','Diane','hamster','f', sysdate, NULL);
+INSERT INTO PET VALUES (SPOWNER.PET_ID_SEQ.nextval, 'Fluffy', 'Harold','cat','f', sysdate, NULL);
+INSERT INTO PET VALUES (SPOWNER.PET_ID_SEQ.nextval, 'Slim', 'Dennis','snake','f', sysdate, NULL);
+
+DROP PROCEDURE spowner.read_pet;
+
+CREATE OR REPLACE PROCEDURE spowner.read_pet(in_name IN VARCHAR2,
+    out_owner OUT VARCHAR2,
+    out_species OUT VARCHAR2,
+    out_sex OUT VARCHAR2,
+    out_birth OUT DATE,
+    out_death OUT DATE)
+IS
+BEGIN
+	SELECT owner, species, sex, birth, death
+	INTO out_owner, out_species, out_sex, out_birth, out_death
+	FROM spowner.pet
+  WHERE name = in_name;
+END;
+/
+
+DECLARE
+    out_owner VARCHAR2(100);
+    out_species VARCHAR2(100);
+    out_sex VARCHAR2(100);
+    out_birth DATE;
+    out_death DATE;
+BEGIN
+   spowner.read_pet('Slimmy', out_owner, out_species, out_sex, out_birth, out_death);
+
+   DBMS_OUTPUT.PUT_LINE('out_owner :  ' || out_owner);
+   DBMS_OUTPUT.PUT_LINE('out_species :  ' || out_species);
+   DBMS_OUTPUT.PUT_LINE('out_sex :  ' || out_sex);
+   DBMS_OUTPUT.PUT_LINE('out_birth :  ' || out_birth);
+   DBMS_OUTPUT.PUT_LINE('out_death :  ' || out_death);
+END;
+/
+
+CREATE OR REPLACE PROCEDURE spowner.read_all_pets(c_allpets OUT SYS_REFCURSOR)
+IS
+BEGIN
+  OPEN c_allpets FOR
+  SELECT name, owner, species, sex, birth, death FROM spowner.pet;
+END;
+/
+
+CREATE OR REPLACE FUNCTION spowner.get_pet_owner(in_name IN VARCHAR2) RETURN VARCHAR2 IS
+   out_owner VARCHAR2(200);
+BEGIN  
+   SELECT owner
+   INTO out_owner
+   FROM spowner.pet where name = in_name;
+
+   RETURN out_owner;
+END;
+/
+
+
+
+
+
+http://mybatis.googlecode.com/svn/trunk/src/test/java/org/apache/ibatis/submitted/refcursor/
+
+
+name owner species sex birth death
+Fluffy Harold cat f 1993-02-04
+Claws Gwen cat m 1994-03-17
+Buffy Harold dog f 1989-05-13
+Fang Benny dog m 1990-08-27
+Bowser Diane dog m 1979-08-31 1995-07-29
+Chirpy Gwen bird f 1998-09-11
+Whistler Gwen bird   1997-12-09
+Slim Benny snake m 1996-04-29
+
+
+CREATE TABLE USER (
+     id MEDIUMINT NOT NULL AUTO_INCREMENT,
+     first_name CHAR(30) NULL,
+     last_name CHAR(30) NULL,
+     PRIMARY KEY (id)
+) ENGINE=MyISAM;
+
+
+INSERT INTO USER (first_name, last_name) VALUES ('Srinivas', 'Mudunuri');
+
+
+CREATE TABLE SPOWNER.EMPLOYEE (
+    EMPID NUMBER(5,0) NOT NULL,
+    EMPNAME VARCHAR2(200),
+    SALARY NUMBER(30,0),
+    DEPTID NUMBER(5,0) NOT NULL,
+    CONSTRAINT EMP_ID_PK PRIMARY KEY (EMPID)
+    USING INDEX
+)
+/
+
+CREATE TABLE SPOWNER.DEPT (
+    DEPTID NUMBER(5,0) NOT NULL,
+    DEPTNAME VARCHAR2(200),
+    LOCNAME VARCHAR2(200),
+    CONSTRAINT DEPT_ID_PK PRIMARY KEY (DEPTID)
+    USING INDEX
+)
+/
+
+ALTER TABLE SPOWNER.EMPLOYEE add constraint FK_EMP_DEPT FOREIGN KEY (DEPTID)
+references SPOWNER.DEPT (DEPTID);
+
+INSERT INTO SPOWNER.DEPT VALUES (1, 'IT', 'Arizona');
+INSERT INTO SPOWNER.DEPT VALUES (2, 'Servicing', 'IOWA');
+INSERT INTO SPOWNER.DEPT VALUES (3, 'Technology', 'TEXAS');
+
+INSERT INTO SPOWNER.EMPLOYEE VALUES (101, 'John Smith', 10000, 1);
+INSERT INTO SPOWNER.EMPLOYEE VALUES (102, 'John Sims', 10000, 1);
+INSERT INTO SPOWNER.EMPLOYEE VALUES (103, 'John McCoy', 10000, 2);
+INSERT INTO SPOWNER.EMPLOYEE VALUES (104, 'DeAnne Shaw', 10000, 3);
+
+
+
+
+
+
+
+
+
+
+
+

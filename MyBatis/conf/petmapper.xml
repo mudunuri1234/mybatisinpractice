@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Place filename in namespace field value without extension (.xml) -->
+<mapper namespace="petmapper">
+
+    <select id="getAllPets" resultType="PetDVO">
+        SELECT ID as id, NAME as name, OWNER as owner, SPECIES as species,
+               SEX as sex, BIRTH as birth, DEATH as death
+        FROM Pet
+    </select>
+
+    <select id="getPetObject" parameterType="java.lang.String" resultType="PetDVO">
+        SELECT ID as id, NAME as name, OWNER as owner,
+        SPECIES as species, SEX as sex,
+        BIRTH as birth, DEATH as death
+        FROM Pet where name = #{name}
+    </select>
+
+    <select id="getAllSpecies" resultType="java.lang.String">
+        SELECT distinct(SPECIES) as species
+        FROM Pet
+    </select>
+
+    <resultMap id="petResultMap" type="PetDVO">
+        <id property="sex" column="sex"/>
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="owner" column="owner"/>
+        <result property="species" column="species"/>
+        <result property="birth" column="birth"/>
+        <result property="death" column="death"/>
+    </resultMap>
+
+    <select id="selectPets" parameterType="java.lang.String" resultMap="petResultMap">
+        SELECT ID as id, NAME as name, OWNER as owner,
+        SPECIES as species, SEX as sex,
+        BIRTH as birth, DEATH as death
+        FROM Pet where sex = #{sex}
+    </select>
+
+    <select id="findAllSnakes" parameterType="PetDVO" resultType="PetDVO">
+        SELECT * FROM Pet WHERE species = #{species}
+        <if test="sex != null">
+            AND sex = #{sex}
+        </if>
+        <if test="owner != null">
+            AND owner like #{owner}
+        </if>
+    </select>
+
+    <select id="findSnakePets" parameterType="PetDVO" resultType="PetDVO">
+        SELECT * FROM Pet WHERE species = #{species}
+        <choose>
+            <when test="sex != null">
+                AND sex = #{sex}
+            </when>
+            <when test="owner != null">
+                AND owner like #{owner}
+            </when>
+            <otherwise>
+                AND name like 'Slim%'
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectPetsIn" resultType="PetDVO">
+        SELECT * FROM Pet P WHERE species in
+        <foreach item="item" index="index" collection="speciesList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="createPet" parameterType="java.util.Map">
+        <selectKey keyProperty="id" resultType="int" order="BEFORE">
+            SELECT PET_ID_SEQ.nextval AS id FROM dual
+        </selectKey>
+        
+        INSERT INTO Pet (ID, NAME, OWNER, SPECIES, SEX, BIRTH)
+        VALUES ( #{id}, #{name}, #{owner}, #{species}, #{sex}, #{birth} )
+    </insert>
+
+    <update id="updatePetData" parameterType="java.util.Map">
+        UPDATE Pet p
+        SET p.birth = #{birth},
+        p.sex = #{sex}
+        WHERE p.name = #{name}
+    </update>
+
+    <update id="updatePetDynamically" parameterType="java.util.Map">
+        UPDATE Pet
+        <set>
+            <if test="birth != null">birth=#{birth},</if>
+            <if test="death != null">death=#{death},</if>
+            <if test="sex != null">sex=#{sex}</if>
+        </set>
+        WHERE name=#{name}
+    </update>
+
+    <delete id="deletePet" parameterType="java.util.Map">
+        DELETE FROM Pet
+        WHERE name = #{name}
+        AND species = #{species}
+    </delete>
+
+    <!--<select id="callReadAllPets" resultType="PetDVO" statementType="CALLABLE">-->
+        <!--{ CALL read_all_pets() }-->
+    <!--</select>-->
+
+    <resultMap id="cursorData" type="PetDVO">
+        <result property="sex" column="sex"/>
+        <result property="name" column="name"/>
+        <result property="owner" column="owner"/>
+        <result property="species" column="species"/>
+        <result property="birth" column="birth"/>
+        <result property="death" column="death"/>
+    </resultMap>
+
+    <select id="callReadAllPets" parameterType="java.util.Map" statementType="CALLABLE">
+        { CALL read_all_pets( #{petData, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=cursorData} ) }
+    </select>
+
+    <select id="callReadPet" parameterType="java.util.Map" resultType="java.util.Map" statementType="CALLABLE">
+        { CALL read_pet(
+            #{name, mode=IN, jdbcType=VARCHAR},
+            #{owner, mode=OUT, jdbcType=VARCHAR},
+            #{species, mode=OUT, jdbcType=VARCHAR},
+            #{sex, mode=OUT, jdbcType=VARCHAR},
+            #{birth, mode=OUT, jdbcType=DATE},
+            #{death, mode=OUT, jdbcType=DATE}
+        )}
+    </select>
+
+    <select id="callPetOwnerFunction" parameterType="java.util.Map" resultType="java.util.Map" statementType="CALLABLE">
+        { #{owner, javaType=String, jdbcType=VARCHAR, mode=OUT} = call get_pet_owner(#{name, javaType=String, jdbcType=VARCHAR, mode=IN}) }
+    </select>
+
+    <insert id="insertUser" parameterType="java.util.Map"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO User (first_name, last_name) values ( #{firstName}, #{lastName} )
+    </insert>
+
+
+    <resultMap id="empResult" type="Employee">
+        <result property="empId" column="empid"/>
+        <result property="empName" column="empname"/>
+        <result property="salary" column="salary"/>
+    </resultMap>
+
+    <resultMap id="deptResult" type="Dept">
+        <id property="deptId" column="deptid"/>
+        <association property="employee" resultMap="empResult"/>
+    </resultMap>
+
+    <select id="getEmployeeAndDeptData" parameterType="java.util.Map" resultMap="deptResult">
+         SELECT e.empid as empId, e.empname as empName,
+              e.salary as salary
+         FROM SPOWNER.Employee e, SPOWNER.dept d
+         WHERE e.deptid = d.deptid
+         AND d.deptid = #{deptId}
+         ORDER BY e.empid
+    </select>
+
+
+</mapper>

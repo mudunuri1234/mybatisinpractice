@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Place filename in namespace field value without extension (.xml) -->
+<mapper namespace="petmapper">
+
+    <resultMap id="cursorData" type="PetDVO">
+        <result property="sex" column="sex"/>
+        <result property="name" column="name"/>
+        <result property="owner" column="owner"/>
+        <result property="species" column="species"/>
+        <result property="birth" column="birth"/>
+        <result property="death" column="death"/>
+    </resultMap>
+
+    <!--<resultMap id="simplePetResultMap" type="PetDVO">-->
+        <!--<id property="sex" column="sex"/>-->
+        <!--<result property="id" column="id"/>-->
+        <!--<result property="name" column="name"/>-->
+        <!--<result property="owner" column="owner"/>-->
+        <!--<result property="species" column="species"/>-->
+        <!--<result property="birth" column="birth"/>-->
+        <!--<result property="death" column="death"/>-->
+    <!--</resultMap>-->
+
+</mapper>

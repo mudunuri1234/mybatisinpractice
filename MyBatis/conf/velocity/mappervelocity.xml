@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.learning.db.mybatis.velocity">
+
+    <select id="getPetObject" lang="velocity" parameterType="java.util.Map" resultType="PetDVO">
+        SELECT ID as id, NAME as name, OWNER as owner,
+        SPECIES as species, SEX as sex,
+        BIRTH as birth, DEATH as death
+        FROM Pet where name = @{name, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getPetObjectData" lang="velocity" parameterType="java.util.Map" resultType="PetDVO">
+        SELECT ID as id, NAME as name, OWNER as owner,
+        SPECIES as species, SEX as sex,
+        BIRTH as birth, DEATH as death
+        FROM Pet where name = @{name, jdbcType=VARCHAR}
+        AND sex = @{sex, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getAllPets" lang="velocity" parameterType="java.util.Map" resultType="PetDVO">
+        SELECT * from Pet
+        #where()
+            #repeat($_parameter.petList $petObj "," " name IN (" ")")
+                @{petObj.name}
+            #end
+        #end
+    </select>
+
+    <select id="getMatchingPets" lang="velocity" parameterType="java.util.List" resultType="PetDVO">
+        SELECT * from Pet
+        #where()
+            #in($_parameter.namesList $item "name")
+                 @{item}
+            #end
+        #end
+    </select>
+
+    <select id="findAllSnakes" lang="velocity"  parameterType="java.util.Map" resultType="PetDVO">
+        #set($sex = $_parameter.sex )
+        #set($owner = $_parameter.owner + '%')
+        
+        SELECT * FROM Pet WHERE species = @{species, jdbcType=VARCHAR}
+        
+        #if($!sex)
+            AND sex =  @{sex, jdbcType=VARCHAR}
+        #end
+
+        #if($!owner)
+            AND owner LIKE @{owner, jdbcType=VARCHAR}
+        #end
+    </select>
+
+    <insert id="createPet" lang="velocity" parameterType="java.util.Map">
+        <selectKey keyProperty="id" resultType="int" order="BEFORE">
+            SELECT PET_ID_SEQ.nextval AS id FROM dual
+        </selectKey>
+
+        INSERT INTO Pet (ID, NAME, OWNER, SPECIES, SEX, BIRTH)
+        VALUES ( @{id}, @{name}, @{owner}, @{species}, @{sex}, @{birth} )
+    </insert>
+
+    <update id="updatePetData" lang="velocity" parameterType="java.util.Map">
+        UPDATE Pet p
+        SET p.birth = @{birth},
+        p.sex = @{sex}
+        WHERE p.name = @{name}
+    </update>
+
+    <delete id="deletePet" parameterType="java.util.Map">
+        DELETE FROM Pet WHERE name = @{name} AND species = @{species}
+    </delete>
+
+
+    <select id="callReadPet" lang="velocity"  parameterType="java.util.Map" resultType="java.util.Map" statementType="CALLABLE">
+        {  CALL read_pet(
+            @{name, mode=IN, jdbcType=VARCHAR},
+            @{owner, mode=OUT, jdbcType=VARCHAR},
+            @{species, mode=OUT, jdbcType=VARCHAR},
+            @{sex, mode=OUT, jdbcType=VARCHAR},
+            @{birth, mode=OUT, jdbcType=DATE},
+            @{death, mode=OUT, jdbcType=DATE}
+        )}
+    </select>    
+
+</mapper>

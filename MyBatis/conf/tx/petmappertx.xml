@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Place filename in namespace field value without extension (.xml) -->
+<mapper namespace="petmappertx">
+
+    <insert id="createPet" parameterType="java.util.Map">
+        <selectKey keyProperty="id" resultType="int" order="BEFORE">
+            SELECT PET_ID_SEQ.nextval AS id FROM dual
+        </selectKey>
+        
+        INSERT INTO Pet (ID, NAME, OWNER, SPECIES, SEX, BIRTH)
+        VALUES ( #{id}, #{name}, #{owner}, #{species}, #{sex}, #{birth} )
+    </insert>
+
+    <update id="updatePetData" parameterType="java.util.Map">
+        UPDATE Pet p
+        SET p.birth = #{birth},
+        p.sex = #{sex}
+        WHERE p.name = #{name}
+    </update>
+
+</mapper>
